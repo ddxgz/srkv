@@ -1,8 +1,8 @@
 package main
 
 import (
-	"ddxgz/accountmanager/skv"
 	"fmt"
+	"github.com/ddxgz/srkv/skv"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -62,7 +62,8 @@ func kvHandler(env *Env, w http.ResponseWriter, r *http.Request) error {
 			// 	http.StatusInternalServerError)
 			// fmt.Fprintf(w, "Hi, the key: %s does not exist", r.URL.Path[1:])
 		}
-		fmt.Fprintf(w, "Hi, you get: %s with value: %s", r.URL.Path[1:], value)
+		// fmt.Fprintf(w, "Hi, you get: %s with value: %s", r.URL.Path[1:], value)
+		fmt.Fprintf(w, string(value[:]))
 		// default:
 		// 	fmt.Fprintf(w, "Hi, you request: %s", r.URL.Path[1:])
 	case "DELETE":

@@ -144,7 +144,7 @@ func main() {
 
 	DBPath := cuser.HomeDir + "/srkv"
 	if _, err := os.Stat(DBPath); os.IsNotExist(err) {
-		err := os.MkdirAll(DBPath, 0755)
+		err := os.MkdirAll(DBPath, 0740)
 		if err != nil {
 			log.Fatal("create file error:", err)
 		}
@@ -166,10 +166,12 @@ func main() {
 	// }
 
 	env := &Env{kvstore}
-
+	const HOST = "0.0.0.0:8080"
 	// http.HandleFunc("/kv/", kvHandler)
 	http.Handle("/kv/", Handler{env, kvHandler})
 	// http.Handle("/all/kv", Handler{env, allkvHandler})
-	log.Fatal(http.ListenAndServe("0.0.0.0:8080", nil))
+
+	log.Println("Listening on:", HOST)
+	log.Fatal(http.ListenAndServe(HOST, nil))
 
 }

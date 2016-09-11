@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO,
                 format='[%(levelname)s] %(message)s [%(filename)s][line:%(lineno)d] %(asctime)s ',
                 datefmt='%d %b %Y %H:%M:%S')
 
-ROUND = 10000
+ROUND = 10
 
 KV_URL = 'http://localhost.devnode.com:8080/kv'
 
@@ -130,7 +130,7 @@ if __name__ == '__main__':
 
     loop = asyncio.get_event_loop()
     tasks = [
-        # asyncio.ensure_future(aput()), # 16.2s
+        asyncio.ensure_future(aput()), # 16.2s
         # asyncio.ensure_future(aget()), # 12.6s
         # asyncio.ensure_future(adelete()), # 22s
         ]

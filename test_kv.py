@@ -1,14 +1,19 @@
 import logging
 import json
+import asyncio
+import time
 
 import requests
-
+import aiohttp
 
 
 logging.basicConfig(level=logging.INFO,
                 format='[%(levelname)s] %(message)s [%(filename)s][line:%(lineno)d] %(asctime)s ',
                 datefmt='%d %b %Y %H:%M:%S')
 
+ROUND = 10000
+
+KV_URL = 'http://localhost.devnode.com:8080/kv'
 
 
 class KVClient:
@@ -72,16 +77,69 @@ class KVClient:
         return code, page
 
 
-k = KVClient()
-print(k.put('d1', 'dataofd1'))
-print(k.get('d1'))
-print(k.put('d2', b'dataofd2'))
-print(k.delete('d1'))
-print(k.get('d1'))
-print(k.get('d2'))
 
-for i in range(100):
-    print(k.put('d{}'.format(i), 'dataofd{}'.format(i)))
+async def aput():
+    async with aiohttp.ClientSession() as session:
+        for i in range(ROUND):
+            async with session.put('{}/d{}'.format(KV_URL, i), data='dataofd{}'.format(i)) as resp:
+                print(resp.status)
+                print(await resp.text())
 
-for i in range(100):
-    print(k.get('d{}'.format(i)))
+
+async def aget():
+    async with aiohttp.ClientSession() as session2:
+        for i in range(ROUND):
+            async with session2.get('{}/d{}'.format(KV_URL, i)) as resp:
+                print(resp.status)
+                print(await resp.text())
+
+
+async def adelete():
+    async with aiohttp.ClientSession() as session2:
+        for i in range(ROUND):
+            async with session2.get('{}/d{}'.format(KV_URL, i)) as r:
+                if r.status == 200:
+                    async with session2.delete('{}d{}'.format(KV_URL, i)) as resp:
+                        print(resp.status)
+                        print(await resp.text())
+
+
+if __name__ == '__main__':
+    start = time.time()
+    #
+    # k = KVClient()
+    # print(k.put('d1', 'dataofd1'))
+    # print(k.get('d1'))
+    # print(k.put('d2', b'dataofd2'))
+    # print(k.delete('d1'))
+    # print(k.get('d1'))
+    # print(k.get('d2'))
+
+    # for i in range(ROUND):
+    #     print(k.put('d{}'.format(i), 'dataofd{}'.format(i)))
+
+    # 21.78s
+    # for i in range(ROUND):
+    #     print(k.get('d{}'.format(i)))
+
+    # for i in range(ROUND):
+    #     print(k.delete('d{}'.format(i)))
+
+    #
+
+
+    loop = asyncio.get_event_loop()
+    tasks = [
+        # asyncio.ensure_future(aput()), # 16.2s
+        # asyncio.ensure_future(aget()), # 12.6s
+        # asyncio.ensure_future(adelete()), # 22s
+        ]
+
+    loop.run_until_complete(asyncio.gather(*tasks))
+    loop.close()
+
+    end = time.time()
+    dur = end-start
+    print('start: ', start)
+    print('end', end)
+    print('dur', dur)

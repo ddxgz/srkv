@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/ddxgz/srkv/skv"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"os/user"
+
+	"github.com/ddxgz/srkv/skv"
 )
 
 func allkvHandler(env *Env, w http.ResponseWriter, r *http.Request) error {
@@ -56,7 +59,7 @@ func kvHandler(env *Env, w http.ResponseWriter, r *http.Request) error {
 		var value []byte
 		err := env.Store.Get(r.URL.Path[1:], &value)
 		if err != nil {
-			log.Println("error when get:", err)
+			log.Println("error when get key: ", r.URL.Path[1:], err)
 			return StatusError{404, err}
 			// http.Error(w, http.StatusText(http.StatusInternalServerError),
 			// 	http.StatusInternalServerError)
@@ -133,10 +136,24 @@ func (se StatusError) Status() int {
 }
 
 func main() {
-	// open the store
+	cuser, err := user.Current()
+	if err != nil {
+		log.Fatal("create file error:", err)
+	}
+	// log.Println(cuser.HomeDir)
+
+	DBPath := cuser.HomeDir + "/srkv"
+	if _, err := os.Stat(DBPath); os.IsNotExist(err) {
+		err := os.MkdirAll(DBPath, 0755)
+		if err != nil {
+			log.Fatal("create file error:", err)
+		}
+		log.Println("Created DB file in: ", DBPath)
+	}
+
 	log.Println("Opening store...")
 	// the db file cannot be located at a shared folder
-	kvstore, err := skv.Open("/home/vagrant/accountmanager/bolt.db")
+	kvstore, err := skv.Open(DBPath + "/bolt.db")
 	if err != nil {
 		log.Fatal("open error:", err)
 	}
